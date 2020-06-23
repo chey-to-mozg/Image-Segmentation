@@ -12,38 +12,37 @@ import matplotlib.pyplot as plt
 
 class CNN(ABC):
 
-    @abstractmethod
-    def default_backbone(self):
-        self.inputs = Input(self.input_size)
-        pass
+    # def inputs_getter(self):
+    #     return self._inputs
+    # def inputs_setter(self, val):
+    #     self._inputs = val
+    # inputs = property(inputs_getter, inputs_setter)
+    #
+    # def outputs_getter(self):
+    #     return self._outputs
+    # def outputs_setter(self, val):
+    #     self._outputs = val
+    # outputs = property(outputs_getter, outputs_setter)
 
     @abstractmethod
-    def chek_input_size(self):
+    def default_backbone(self):
         pass
 
 
     @abstractmethod
     def create_model(self):
         if self.backbone is None:
-            X = self.default_backbone
+            self.outputs = self.default_backbone()
         else:
-            X = self.backbone
-
+            self.outputs = self.backbone.outputs
         # last layer -> self.outputs
         pass
 
-    @property
-    def inputs(self):
-        pass
-
-    @property
-    def outputs(self):
-        pass
 
 
-    def __init__(self, pretrained_weights = None, input_size = (None, None, 3), backbone=None):
-        self.chek_input_size()
-
+    def __init__(self, pretrained_weights = None, input_size = (None, None, 3), output_channels = 1, n_classes = 10, backbone=None):
+        self.output_channels = output_channels
+        self.n_classes = n_classes
         self.backbone = backbone
         self.input_size = input_size
 
