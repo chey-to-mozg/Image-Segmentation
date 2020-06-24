@@ -9,6 +9,7 @@ from tensorflow.keras.models import Model
 import tensorflow as tf
 import os
 import matplotlib.pyplot as plt
+import segmentation_models as sm
 
 class CNN(ABC):
 
@@ -34,6 +35,7 @@ class CNN(ABC):
         if self.backbone is None:
             self.outputs = self.default_backbone()
         else:
+            self.inputs = self.backbone.inputs
             self.outputs = self.backbone.outputs
         # last layer -> self.outputs
         pass
@@ -54,9 +56,17 @@ class CNN(ABC):
             self.model.load_weights(pretrained_weights)
 
 
-    def compile(self, optim=tf.keras.optimizers.Adam(lr=1e-4), loss=tf.keras.losses.CategoricalCrossentropy(),metrics=[tf.keras.metrics.MeanIoU(num_classes=10)]):
+
+    def compile(self, optim=tf.keras.optimizers.Adam(lr=1e-4)):
         self.model.summary()
-        self.model.compile(optimizer=optim, loss=loss, metrics=metrics)
+
+        if self.n_classes == 1:
+            loss = tf.keras.losses.BinaryCrossentropy()
+        else:
+            loss = tf.keras.losses.CategoricalCrossentropy()
+
+        # self.model.compile(optimizer=optim, loss=loss, metrics=[sm.metrics.IOUScore(threshold=0.5)])
+        self.model.compile(optimizer=optim, loss='mse', metrics=[sm.metrics.IOUScore(threshold=0.5)])
 
 
     def fit(self, x_train=None, y_train=None, valid_data=None, BS=None, EPOCHS=1, path_to_save=None):

@@ -22,13 +22,13 @@ class Dataset:
     def __init__(
             self,
             images_dir,
-            masks_dir,
+            crop_size = 256,
             augmentation=None,
             preprocessing=None,
     ):
         self.ids = os.listdir(images_dir)
         self.images_fps = [os.path.join(images_dir, image_id) for image_id in self.ids]
-        self.masks_fps = [os.path.join(masks_dir, image_id.split('.')[0] + '.png') for image_id in self.ids]
+        self.crop_size = crop_size
         # convert str names to class values on masks4
 
         self.augmentation = augmentation
@@ -38,16 +38,12 @@ class Dataset:
 
         # read data
 
-        image = cv2.imread(self.images_fps[i], -1)  # [:,:,0] #cv2.imread(self.images_fps[i], -1)
-        image = cv2.normalize(image, None, 0, 1, cv2.NORM_MINMAX, cv2.CV_32F)
-        # print(image)
-        ##
-        # image = image.astype("float32") / 255
-        ##
+        img = cv2.imread(self.images_fps[i])  # [:,:,0] #cv2.imread(self.images_fps[i], -1)
 
-        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        mask = cv2.imread(self.masks_fps[i], 0)  # cv2.imread(self.masks_fps[i], 0)
-        mask = cv2.normalize(mask, None, 0, 1, cv2.NORM_MINMAX, cv2.CV_32F)
+        img = cv2.normalize(img, None, 0, 1, cv2.NORM_MINMAX, cv2.CV_32F)
+        img = img[:, :, ::-1]
+        image = img[:, :int(img.shape[1] / 2), :]
+        mask = img[:, int(img.shape[1] / 2):, :]
         ##
         # mask = mask / 255
         ##

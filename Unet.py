@@ -1,9 +1,11 @@
 from tensorflow.keras.layers import Convolution2D, Input
-from tensorflow.keras.layers import concatenate, ELU, Softmax
+from tensorflow.keras.layers import concatenate, ELU, Activation, Softmax
 from tensorflow.keras.layers import AveragePooling2D, UpSampling2D
 import numpy as np
+import tensorflow as tf
+import segmentation_models as sm
 
-from  CNN import CNN
+from CNN import CNN
 
 class Unet(CNN):
 
@@ -65,15 +67,19 @@ class Unet(CNN):
         X = Convolution2D(filters=2, kernel_size=(3, 3), padding='same', kernel_initializer='he_normal')(X)
         X = ELU()(X)
 
-        X = Convolution2D(filters=self.output_channels, kernel_size=(1, 1), padding='same', kernel_initializer='he_normal')(X)
+        if self.n_classes == 1:
+            activation = 'sigmoid'
+        else:
+            activation = 'softmax'
 
-        self.outputs = Softmax()(X)
+        self.outputs = Convolution2D(filters=self.output_channels, kernel_size=(1, 1), activation=activation, padding='same', kernel_initializer='he_normal')(X)
 
 
 
 
-    def __init__(self, pretrained_weights=None, input_size=(256, 256, 1), output_channels = 3, depth = 3, backbone=None):
+
+    def __init__(self, pretrained_weights=None, input_size=(256, 256, 1), output_channels = 3, depth = 3, backbone=None, n_classes=1):
         self.depth = depth
-        super().__init__(pretrained_weights, input_size, output_channels, backbone)
+        super().__init__(pretrained_weights, input_size, output_channels, n_classes, backbone)
 
 
